@@ -31,7 +31,7 @@ export const serverRouter = trpc
 
       return await ctx.prisma.groceryList.update({
         where: { id },
-        data: { ...rest },
+        data: { ...rest, checked: input.checked ? 1 : 0 },
       });
     },
   })

@@ -49,6 +49,7 @@ const Home: NextPage = () => {
     (item: GroceryList) => {
       updateOneMutation.mutate({
         ...item,
+        title: item.title ?? "",
         checked: !item.checked,
       });
     },
@@ -58,8 +59,8 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Grocery List</title>
-        <meta name="description" content="Visit www.mosano.eu" />
+        <title>Input2</title>
+        <meta name="description" content="Visit www.christensenindustries.com" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
