@@ -3,12 +3,1003 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model GroceryList {
-  id      Int      @id @default(autoincrement())
-  title   String
-  checked Boolean? @default(false)
+  id      Int     @id @default(autoincrement())
+  title   String? @db.VarChar(45)
+  checked Int?    @default(0) @db.TinyInt
+}
+
+model APPLICATION_USER {
+  USER_ID           String   @id @db.VarChar(16)
+  GROUP_ID          String?  @db.VarChar(16)
+  NAME              String?  @db.VarChar(40)
+  CHECK_APPROVED_BY String?  @db.Char(1)
+  USER_PWD          String?  @db.VarChar(12)
+  USER_TYPE         String?  @db.Char(1)
+  EMP_CUST_SUPP_ID  String?  @db.VarChar(16)
+  CONTACT_NO        Decimal? @db.Decimal(5, 0)
+}
+
+model AUDIT_CHECKLIST {
+  AUDIT_MANAGER_ID String    @db.VarChar(16)
+  CHECKLIST_ID     String    @db.VarChar(16)
+  SUBJECT          String?   @db.VarChar(40)
+  CLOSED           String    @db.Char(1)
+  CLOSED_DATE      DateTime? @db.DateTime(0)
+
+  @@id([AUDIT_MANAGER_ID, CHECKLIST_ID])
+}
+
+model AUDIT_FINDINGS {
+  AUDIT_MANAGER_ID String    @db.VarChar(16)
+  FINDING_ID       String    @db.VarChar(16)
+  FINDING_TYPE     String?   @db.VarChar(16)
+  FOLLOWUP_BY      String?   @db.VarChar(16)
+  CLOSED_DATE      DateTime? @db.DateTime(0)
+
+  @@id([AUDIT_MANAGER_ID, FINDING_ID])
+}
+
+model AUDIT_MANAGER {
+  AUDIT_ID         String    @db.VarChar(16)
+  AUDIT_MANAGER_ID String    @id @db.VarChar(16)
+  STANDARD         String?   @db.VarChar(40)
+  SUBJECT          String?   @db.VarChar(40)
+  SCHEDULED_DATE   DateTime? @db.DateTime(0)
+  LEAD_AUDITOR     String?   @db.VarChar(16)
+  ASST_AUDITOR1    String?   @db.VarChar(16)
+  ASST_AUDITOR2    String?   @db.VarChar(16)
+  ASST_AUDITOR3    String?   @db.VarChar(16)
+  AUDITEE1         String?   @db.VarChar(16)
+  AUDITEE2         String?   @db.VarChar(16)
+  AUDITEE_FUNCTION String?   @db.VarChar(16)
+  SCORE            Decimal?  @db.Decimal(4, 0)
+  RESULT           String    @db.Char(2)
+  COMPLETION_DATE  DateTime? @db.DateTime(0)
+  ENTITY_ID        String?   @db.VarChar(8)
+  CREATE_BY        String    @db.VarChar(16)
+  CREATE_DATE      DateTime  @db.DateTime(0)
+  MODIFIED_BY      String?   @db.VarChar(16)
+  MODIFIED_DATE    DateTime? @db.DateTime(0)
+}
+
+model AUDT_CHKL_OBSN {
+  AUDIT_MANAGER_ID String  @db.VarChar(16)
+  CHECKLIST_ID     String  @db.VarChar(16)
+  OBSERVATION      String? @db.MediumText
+
+  @@id([AUDIT_MANAGER_ID, CHECKLIST_ID])
+}
+
+model AUDT_CHKL_QUST {
+  AUDIT_MANAGER_ID String  @db.VarChar(16)
+  CHECKLIST_ID     String  @db.VarChar(16)
+  QUESTION         String? @db.MediumText
+
+  @@id([AUDIT_MANAGER_ID, CHECKLIST_ID])
+}
+
+model AUDT_CHKL_RFNC {
+  AUDIT_MANAGER_ID String  @db.VarChar(16)
+  CHECKLIST_ID     String  @db.VarChar(16)
+  REFERENCE        String? @db.MediumText
+
+  @@id([AUDIT_MANAGER_ID, CHECKLIST_ID])
+}
+
+model AUDT_FNDS_FLUP {
+  AUDIT_MANAGER_ID String  @db.VarChar(16)
+  FINDING_ID       String  @db.VarChar(16)
+  FOLLOWUP_TEXT    String? @db.MediumText
+
+  @@id([AUDIT_MANAGER_ID, FINDING_ID])
+}
+
+model AUDT_FNDS_TEXT {
+  AUDIT_MANAGER_ID String  @db.VarChar(16)
+  FINDING_ID       String  @db.VarChar(16)
+  FINDING_TEXT     String? @db.MediumText
+
+  @@unique([AUDIT_MANAGER_ID, FINDING_ID], map: "PK_AUD_FNDS_TEXT")
+}
+
+model AUDT_MNGR_CMNT {
+  AUDIT_MANAGER_ID String  @id @db.VarChar(16)
+  COMMENTS         String? @db.MediumText
+}
+
+model CORRECTION {
+  CORRECTIVE_ID   String    @id @db.VarChar(16)
+  CORRECTION_DATE DateTime? @db.DateTime(0)
+  ACTION_BY       String?   @db.VarChar(16)
+  CORRECTION_TEXT String?   @db.MediumText
+}
+
+model CORRECTIVE {
+  CORRECTIVE_ID     String    @id @db.VarChar(16)
+  REQ_SUPP_CONT_NO  Decimal?  @db.Decimal(5, 0)
+  REQ_CUST_CONT_NO  Decimal?  @db.Decimal(5, 0)
+  PROJECT_ID        String?   @db.VarChar(16)
+  CAUSE             String?   @db.VarChar(16)
+  REQUEST_BY        String    @db.VarChar(16)
+  REQ_EMPLOYEE_ID   String?   @db.VarChar(16)
+  ASSIGNED_TO       String    @db.VarChar(16)
+  ASSI_EMPLOYEE_ID  String?   @db.VarChar(16)
+  ASSI_SUPPLIER_ID  String?   @db.VarChar(16)
+  ASSI_SUPP_CONT_NO Decimal?  @db.Decimal(5, 0)
+  ASSI_CUSTOMER_ID  String?   @db.VarChar(16)
+  ASSI_CUST_CONT_NO Decimal?  @db.Decimal(5, 0)
+  EFFECTIVE         String    @db.Char(1)
+  CORRECTIVE_DATE   DateTime? @db.DateTime(0)
+  REFERENCE         String?   @db.VarChar(24)
+  ACTION_TYPE       String?   @db.VarChar(16)
+  SUBJECT           String?   @db.VarChar(16)
+  DUE_DATE          DateTime? @db.DateTime(0)
+  CLOSED            String    @db.Char(1)
+  CLOSED_DATE       DateTime? @db.DateTime(0)
+  PERFORMED_BY      String?   @db.VarChar(16)
+  FOLLOWUP_BY       String?   @db.VarChar(16)
+  FOLLOWUP_DATE     DateTime? @db.DateTime(0)
+  CORR_ACTION_DATE  DateTime? @db.DateTime(0)
+  REISSUED_FROM     String?   @db.VarChar(16)
+  REISSUED_TO       String?   @db.VarChar(16)
+  EFFECTIVE_DATE    DateTime? @db.DateTime(0)
+  USER_DEFINED_1    String?   @db.VarChar(16)
+  USER_DEFINED_2    String?   @db.VarChar(16)
+  TITLE             String?   @db.VarChar(45)
+  REQ_CUSTOMER_ID   String?   @db.VarChar(16)
+  REQ_SUPPLIER_ID   String?   @db.VarChar(16)
+  CREATE_BY         String    @db.VarChar(16)
+  CREATE_DATE       DateTime  @db.DateTime(0)
+  MODIFIED_BY       String?   @db.VarChar(16)
+  MODIFIED_DATE     DateTime? @db.DateTime(0)
+  ENTITY_ID         String?   @db.VarChar(8)
+}
+
+model CORRECTIVE_CTRL {
+  CORRECTIVE_ID String    @id @db.VarChar(16)
+  CONTROL_TEXT  String?   @db.MediumText
+  CREATE_BY     String    @db.VarChar(16)
+  CREATE_DATE   DateTime  @db.DateTime(0)
+  MODIFIED_BY   String?   @db.VarChar(16)
+  MODIFIED_DATE DateTime? @db.DateTime(0)
+  CAUSE_TEXT    String?   @db.MediumText
+}
+
+model CORRECTIVE_LINK {
+  CORRECTIVE_ID   String  @id @db.VarChar(16)
+  CORRECTIVE_LINK String? @db.VarChar(255)
+}
+
+model CORRECTIVE_NOTIFY {
+  CORRECTIVE_ID String   @db.VarChar(16)
+  STAGE         String   @db.VarChar(1)
+  NOTIFY_DATE   DateTime @db.DateTime(0)
+
+  @@id([CORRECTIVE_ID, STAGE, NOTIFY_DATE])
+}
+
+model CORRECTIVE_PRODUCT {
+  CORRECTIVE_ID String @db.VarChar(16)
+  PRODUCT_ID    String @db.VarChar(30)
+
+  @@id([CORRECTIVE_ID, PRODUCT_ID])
+}
+
+model CORRECTIVE_TREND {
+  CORRECTIVE_ID String  @id @db.VarChar(16)
+  NC_TREND      String? @db.MediumText
+}
+
+model COURSE {
+  COURSE_ID       String    @id @db.VarChar(16)
+  NAME            String?   @db.VarChar(40)
+  NUMBER_OF_HOURS Decimal?  @db.Decimal(7, 2)
+  CREATE_BY       String    @db.VarChar(16)
+  CREATE_DATE     DateTime  @db.DateTime(0)
+  MODIFIED_BY     String?   @db.VarChar(16)
+  MODIFIED_DATE   DateTime? @db.DateTime(0)
+  ENTITY_ID       String?   @db.VarChar(8)
+}
+
+model COURSE_SKILL {
+  COURSE_ID String @db.VarChar(16)
+  SKILL_ID  String @db.VarChar(16)
+
+  @@id([COURSE_ID, SKILL_ID])
+}
+
+model COURSE_TITLE {
+  COURSE_ID    String @id @db.VarChar(40)
+  COURSE_TITLE String @db.VarChar(40)
+}
+
+model CTA_ATTENDANCE {
+  COURSE_ATND_ID   String    @id @db.VarChar(16)
+  COURSE_ID        String?   @db.VarChar(16)
+  DATE_TIME        DateTime? @db.DateTime(0)
+  PEOPLE_ID        String?   @db.VarChar(16)
+  INSTITUTION      String?   @db.VarChar(40)
+  INSTRUCTOR       String?   @db.VarChar(40)
+  COMPETENCY       String?   @db.VarChar(3)
+  MINUTES          Int?
+  RESULT           String    @db.Char(1)
+  REIMBURSE        String    @db.Char(1)
+  REIMBURSE_AMOUNT Decimal?  @db.Decimal(9, 2)
+  EXPIRATION_DATE  DateTime? @db.DateTime(0)
+  EXPIRATION_DAYS  Decimal?  @db.Decimal(4, 0)
+  ENTITY_ID        String?   @db.VarChar(8)
+  CREATE_BY        String    @db.VarChar(16)
+  CREATED_DATE     DateTime  @db.DateTime(0)
+  MODIFIED_BY      String?   @db.VarChar(16)
+  MODIFIED_DATE    DateTime? @db.DateTime(0)
+}
+
+model CTA_ATTENDANCE_LINK {
+  COURSE_ATND_ID      String @id @db.VarChar(16)
+  CTA_ATTENDANCE_LINK String @db.VarChar(255)
+}
+
+model CUSTOMER {
+  CUSTOMER_ID        String    @id @db.VarChar(16)
+  NAME               String?   @db.VarChar(50)
+  CUSTOMER_TYPE      String?   @db.VarChar(16)
+  ADDRESS_LINE_1     String?   @db.VarChar(50)
+  ADDRESS_LINE_2     String?   @db.VarChar(50)
+  ADDRESS_LINE_3     String?   @db.VarChar(30)
+  ADDRESS_LINE_4     String?   @db.VarChar(30)
+  CITY               String?   @db.VarChar(30)
+  ZIP                String?   @db.VarChar(12)
+  STATE              String?   @db.VarChar(16)
+  COUNTRY            String?   @db.VarChar(50)
+  PHONE              String?   @db.VarChar(25)
+  FAX                String?   @db.VarChar(25)
+  PRIMARY_CONTACT_NO Decimal?  @db.Decimal(5, 0)
+  STATUS             String    @db.Char(1)
+  EMAIL_ADDRESS      String?   @db.VarChar(100)
+  ASSIGNED_TO        String?   @db.VarChar(16)
+  SOURCE             String?   @db.VarChar(16)
+  TERRITORY          String?   @db.VarChar(16)
+  USER_DEFINED_8     String?   @db.VarChar(16)
+  USER_DEFINED_9     String?   @db.VarChar(16)
+  CREATE_BY          String    @db.VarChar(16)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  USER_DEFINED_10    String?   @db.VarChar(16)
+  USER_DEFINED_11    String?   @db.VarChar(16)
+  ENTITY_ID          String?   @db.VarChar(8)
+}
+
+model CUSTOMER_COMMENTS {
+  CUSTOMER_ID String @id @db.VarChar(16)
+  COMMENTS    Bytes?
+}
+
+model CUSTOMER_CONTACT {
+  CUSTOMER_ID        String    @db.VarChar(16)
+  CUST_CONT_NO       Decimal   @db.Decimal(5, 0)
+  LAST_NAME          String?   @db.VarChar(30)
+  FIRST_NAME         String?   @db.VarChar(30)
+  MIDDLE_INITIAL     String?   @db.Char(1)
+  FUNCTION_CODE      String?   @db.VarChar(16)
+  JOB_CODE           String?   @db.VarChar(16)
+  CONTACT_PHONE      String?   @db.VarChar(25)
+  CONTACT_FAX        String?   @db.VarChar(25)
+  OTHER_NUMBER       String?   @db.VarChar(25)
+  OTHER_ADDRESS      String?   @db.VarChar(30)
+  REFERENCE          String?   @db.VarChar(40)
+  WORK_EMAIL_ADDRESS String?   @db.VarChar(100)
+  STATUS             String    @db.Char(1)
+  ADDRESS_LINE_1     String?   @db.VarChar(30)
+  ADDRESS_LINE_2     String?   @db.VarChar(30)
+  CITY               String?   @db.VarChar(30)
+  STATE              String?   @db.VarChar(16)
+  COUNTRY            String?   @db.VarChar(16)
+  ZIP                String?   @db.VarChar(12)
+  HOME_PHONE         String?   @db.VarChar(25)
+  HOME_FAX           String?   @db.VarChar(25)
+  CREATE_BY          String    @db.VarChar(16)
+  HOME_EMAIL_ADDRESS String?   @db.VarChar(100)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  BIRTH_DATE         DateTime? @db.DateTime(0)
+
+  @@id([CUSTOMER_ID, CUST_CONT_NO])
+}
+
+model CUSTOMER_FEEDBACK {
+  ROWID             Int       @id @default(autoincrement())
+  FEEDBACK_ID       String    @db.VarChar(16)
+  CUSTOMER_ID       String    @db.VarChar(16)
+  CUST_CONT_NO      Decimal?  @db.Decimal(5, 0)
+  FEEDBACK_DATE     DateTime? @db.DateTime(0)
+  SUBJECT           String?   @db.VarChar(16)
+  REFERENCE         String?   @db.VarChar(30)
+  CLOSED            String    @db.Char(1)
+  DUE_DATE          DateTime? @db.DateTime(0)
+  CLOSED_DATE       DateTime? @db.DateTime(0)
+  ASSIGNED_TO       String?   @db.VarChar(16)
+  ACKNOWLEDGED_BY   String?   @db.VarChar(16)
+  ACKNOWLEDGED_DATE DateTime? @db.DateTime(0)
+  RESPONSED_BY      String?   @db.VarChar(16)
+  RESPONSED_DATE    DateTime? @db.DateTime(0)
+  FOLLOWUP_BY       String?   @db.VarChar(16)
+  FOLLOWUP_DATE     DateTime? @db.DateTime(0)
+  USER_DEFINED_1    String?   @db.VarChar(16)
+  USER_DEFINED_2    String?   @db.VarChar(16)
+  FEEDBACK_TYPE     String?   @db.VarChar(16)
+  CREATE_BY         String    @db.VarChar(16)
+  CREATE_DATE       DateTime  @db.DateTime(0)
+  MODIFIED_BY       String?   @db.VarChar(16)
+  MODIFIED_DATE     DateTime? @db.DateTime(0)
+  ENTITY_ID         String?   @db.VarChar(8)
+}
+
+model CUSTOMER_TYPE {
+  CUSTOMER_TYPE String  @id @db.VarChar(16)
+  DESCRIPTION   String? @db.VarChar(40)
+}
+
+model DOCM_CHNG_RQST {
+  REQUEST_ID    String    @id @unique(map: "PK_DOC_CHNG_REQ") @db.VarChar(16)
+  REQUEST_DATE  DateTime? @db.DateTime(0)
+  ASSIGNED_TO   String?   @db.VarChar(16)
+  DUE_DATE      DateTime? @db.DateTime(0)
+  DOCUMENT_ID   String    @db.VarChar(24)
+  CHANGE_TYPE   String?   @db.VarChar(16)
+  CHANGE_REASON String?   @db.VarChar(255)
+  PRIORITY      String?   @db.VarChar(16)
+  DECISION      String    @db.Char(1)
+  DECISION_DATE DateTime? @db.DateTime(0)
+  CLOSED        String    @db.Char(1)
+  CLOSED_DATE   DateTime? @db.DateTime(0)
+  REQUEST_BY    String    @db.Char(1)
+  SUPPLIER_ID   String?   @db.VarChar(16)
+  SUPP_CONT_NO  Decimal?  @db.Decimal(5, 0)
+  CUSTOMER_ID   String?   @db.VarChar(16)
+  CUST_CONT_NO  Decimal?  @db.Decimal(5, 0)
+  FUNCTION_CODE String?   @db.VarChar(16)
+  EMPLOYEE_ID   String?   @db.VarChar(16)
+  CREATE_BY     String    @db.VarChar(16)
+  CREATE_DATE   DateTime  @db.DateTime(0)
+  MODIFIED_BY   String?   @db.VarChar(16)
+  MODIFIED_DATE DateTime? @db.DateTime(0)
+  ENTITY_ID     String?   @db.VarChar(8)
+}
+
+model DOCM_CHNG_RSPN {
+  REQUEST_ID    String  @id @unique(map: "PK_DOC_CHNG_RESP") @db.VarChar(16)
+  RESPONSE_TEXT String? @db.MediumText
+}
+
+model DOCS_AVAIL {
+  DOCUMENT_ID String    @id @db.VarChar(45)
+  CTRL_DOC    String?   @db.VarChar(255)
+  DIST_DOC    String?   @db.VarChar(255)
+  LAST_AUDIT  DateTime? @db.DateTime(0)
+}
+
+model DOCUMENTS {
+  DOCUMENT_ID        String    @id @db.VarChar(24)
+  NAME               String    @db.VarChar(70)
+  TYPE               String?   @db.VarChar(16)
+  SUBJECT            String?   @db.VarChar(40)
+  MAJOR_LOCATION     String?   @db.VarChar(16)
+  MINOR_LOCATION     String?   @db.VarChar(16)
+  USER_DEFINED_1     String?   @db.VarChar(16)
+  REFERENCE          String?   @db.VarChar(40)
+  STATUS             String    @default("C") @db.Char(1)
+  REVISION_LEVEL     String?   @db.VarChar(4)
+  ISSUE_DATE         DateTime? @db.DateTime(0)
+  LAST_AUDIT_DATE    DateTime? @db.DateTime(0)
+  NEXT_AUDIT_DATE    DateTime? @db.DateTime(0)
+  CHECKED_OUT        String    @db.Char(1)
+  AUDIT_FUNCT_CODE   String?   @db.VarChar(16)
+  AUDIT_RESPONSIBLE  String    @db.Char(1)
+  JOB_CODE           String?   @db.VarChar(16)
+  EMPLOYEE_ID        String?   @db.VarChar(16)
+  SUPPLIER_ID        String?   @db.VarChar(16)
+  SUPP_CONT_NO       Decimal?  @db.Decimal(5, 0)
+  CUSTOMER_ID        String?   @db.VarChar(16)
+  CUST_CONT_NO       Decimal?  @db.Decimal(5, 0)
+  AUDIT_SPL_INTERVAL Decimal?  @db.Decimal(10, 0)
+  AUDIT_STD_INTERVAL Decimal?  @db.Decimal(10, 0)
+  FUNCTION_CODE      String?   @db.VarChar(16)
+  AUD_TIME_ESTIMATE  Decimal?  @db.Decimal(6, 2)
+  RETENSION          Decimal?  @db.Decimal(10, 0)
+  CREATE_BY          String?   @db.VarChar(16)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  USER_DEFINED_2     String?   @db.VarChar(16)
+  USER_DEFINED_3     String?   @db.VarChar(16)
+  ENTITY_ID          String?   @db.VarChar(8)
+}
+
+model DOCUMENTS_NOTIFY {
+  DOCUMENT_ID    String    @db.VarChar(30)
+  REVISION_LEVEL String    @db.VarChar(8)
+  ACTION         String    @db.VarChar(1)
+  NOTIFIED_DATE  DateTime? @db.DateTime(0)
+
+  @@id([DOCUMENT_ID, REVISION_LEVEL, ACTION])
+}
+
+model DOC_CHG_REQ_TXT {
+  REQUEST_ID   String  @id @unique(map: "PK_DOC_CHG_REQ_TXT") @db.VarChar(16)
+  REQUEST_TEXT String? @db.MediumText
+}
+
+model EIGHTYFIVETWELVE {
+  PRODUCT_ID    String @db.VarChar(30)
+  PROCESSING_ID String @db.VarChar(30)
+
+  @@id([PRODUCT_ID, PROCESSING_ID])
+}
+
+model EIGHTYFOURELEVEN {
+  VENDPERF_ID String   @db.VarChar(16)
+  INPUT_ID    String   @db.VarChar(16)
+  SUPPLIER_ID String   @db.VarChar(16)
+  UNIT        String   @db.VarChar(45)
+  VALUE       String   @db.VarChar(45)
+  SAMPLE_DATE DateTime @db.DateTime(0)
+  PEOPLE_ID   String?  @db.VarChar(16)
+
+  @@id([VENDPERF_ID, UNIT])
+}
+
+model EXPIRATION {
+  EXPIRATION_ID String    @id @db.VarChar(16)
+  PRODUCT_ID    String?   @db.VarChar(45)
+  EXPIRY_DATE   DateTime? @db.DateTime(0)
+  LOT           String?   @db.VarChar(45)
+  DISPOSITION   String?   @db.VarChar(1)
+  COMMENT       String?   @db.VarChar(255)
+  CREATE_BY     String?   @db.VarChar(45)
+  CREATE_DATE   DateTime? @db.DateTime(0)
+}
+
+model INPUTS_NOTIFY {
+  INPUT_ID      String   @db.VarChar(30)
+  ACTION        String   @db.VarChar(1)
+  NOTIFIED_DATE DateTime @db.DateTime(0)
+  ASSIGNED_TO   String?  @db.VarChar(45)
+
+  @@id([INPUT_ID, ACTION, NOTIFIED_DATE])
+}
+
+model JOBS {
+  JOB_CODE       String    @db.VarChar(16)
+  FUNCTION_CODE  String    @db.VarChar(40)
+  STATUS         String    @db.Char(1)
+  REVISION_LEVEL String?   @db.VarChar(4)
+  ISSUE_DATE     DateTime? @db.DateTime(0)
+  ENTITY_ID      String?   @db.VarChar(8)
+  CREATE_BY      String    @db.VarChar(16)
+  CREATED_DATE   DateTime  @db.DateTime(0)
+  MODIFIED_BY    String?   @db.VarChar(16)
+  MODIFIED_DATE  DateTime? @db.DateTime(0)
+
+  @@id([JOB_CODE, FUNCTION_CODE])
+}
+
+model JOB_DESCRIPTION {
+  JOB_CODE      String  @db.VarChar(16)
+  FUNCTION_CODE String  @db.VarChar(16)
+  DESCRIPTION   String? @db.MediumText
+
+  @@id([JOB_CODE, FUNCTION_CODE])
+}
+
+model NCM_DESCRIPTION {
+  NCM_ID      String  @id @db.VarChar(16)
+  DESCRIPTION String? @db.MediumText
+}
+
+model NCM_DISPOSITION {
+  NCM_ID      String  @id @db.VarChar(16)
+  DISPOSITION String? @db.MediumText
+}
+
+model NCM_NOTIFY {
+  NCM_ID        String   @db.VarChar(30)
+  ACTION        String   @db.VarChar(1)
+  NOTIFIED_DATE DateTime @db.DateTime(0)
+  ASSIGNED_TO   String?  @db.VarChar(45)
+
+  @@id([NCM_ID, ACTION, NOTIFIED_DATE])
+}
+
+model NCM_TYPE {
+  NCM_TYPE    String  @id @db.VarChar(16)
+  DESCRIPTION String? @db.VarChar(40)
+}
+
+model NCM_VERIFICATION {
+  NCM_ID       String  @id @db.VarChar(16)
+  VERIFICATION String? @db.MediumText
+}
+
+model NINETYONETWENTY {
+  COLLECT_ID  String   @id @db.VarChar(16)
+  INPUT_ID    String   @db.VarChar(16)
+  CUSTOMER_ID String   @db.VarChar(16)
+  UNIT        String   @db.VarChar(45)
+  VALUE       String   @db.VarChar(45)
+  SAMPLE_DATE DateTime @db.DateTime(0)
+  PEOPLE_ID   String?  @db.VarChar(16)
+}
+
+model NONCONFORMANCE {
+  NCM_ID             String    @id @db.VarChar(16)
+  NCM_TYPE           String?   @db.VarChar(16)
+  NCM_DATE           DateTime? @db.DateTime(0)
+  REPORTED_BY        String    @db.Char(1)
+  PEOPLE_ID          String?   @db.VarChar(16)
+  CUSTOMER_ID        String?   @db.VarChar(16)
+  CUST_CONT_NO       Decimal?  @db.Decimal(5, 0)
+  SUPPLIER_ID        String?   @db.VarChar(16)
+  SUPP_CONT_NO       Decimal?  @db.Decimal(5, 0)
+  ASSIGNED_TO        String?   @db.VarChar(16)
+  SUBJECT            String?   @db.VarChar(16)
+  CAUSE              String?   @db.VarChar(16)
+  LOCATION_FOUND     String?   @db.VarChar(16)
+  LOCATION_GENERATED String?   @db.VarChar(16)
+  DUE_DATE           DateTime? @db.DateTime(0)
+  REFERENCE_1        String?   @db.VarChar(24)
+  REFERENCE_2        String?   @db.VarChar(24)
+  REFERENCE_3        String?   @db.VarChar(24)
+  REFERENCE_4        String?   @db.VarChar(24)
+  REFERENCE_5        String?   @db.VarChar(24)
+  REFERENCE_6        Decimal?  @db.Decimal(11, 2)
+  REFERENCE_7        Decimal?  @db.Decimal(11, 2)
+  REFERENCE_8        Decimal?  @db.Decimal(11, 2)
+  REFERENCE_9        Decimal?  @db.Decimal(11, 2)
+  REFERENCE_10       Decimal?  @db.Decimal(11, 2)
+  REFERENCE_11       Decimal?  @db.Decimal(11, 2)
+  REFERENCE_12       Decimal?  @db.Decimal(11, 2)
+  REFERENCE_13       Decimal?  @db.Decimal(11, 2)
+  REFERENCE_14       Decimal?  @db.Decimal(11, 2)
+  REFERENCE_15       Decimal?  @db.Decimal(11, 2)
+  USER_DEFINED_1     String?   @db.VarChar(16)
+  USER_DEFINED_2     String?   @db.VarChar(16)
+  USER_DEFINED_3     String?   @db.VarChar(16)
+  USER_DEFINED_4     String?   @db.VarChar(16)
+  USER_DEFINED_5     String?   @db.VarChar(16)
+  USER_DEFINED_6     String?   @db.VarChar(16)
+  USER_DEFINED_7     String?   @db.VarChar(16)
+  PRD_INSP_PLN_SYSID String?   @db.VarChar(16)
+  PRODUCT_ID         String?   @db.VarChar(30)
+  OPERATION_NO       String?   @db.VarChar(8)
+  LOT_SYSID          String?   @db.VarChar(16)
+  PO_NUMBER          String?   @db.VarChar(16)
+  LOT_NUMBER         String?   @db.VarChar(16)
+  LOT_SIZE           Decimal?  @db.Decimal(10, 0)
+  ACCEPTED           Decimal?  @db.Decimal(10, 0)
+  REJECTED           Decimal?  @db.Decimal(10, 0)
+  MADE_BY            String    @db.Char(1)
+  MADE_BY_EMP_ID     String?   @db.VarChar(16)
+  MADE_BY_CUST_ID    String?   @db.VarChar(16)
+  MADE_BY_SUPP_ID    String?   @db.VarChar(16)
+  EQUIPMENT_ID       String?   @db.VarChar(16)
+  TOOL_ID            String?   @db.VarChar(16)
+  DEVICE_ID          String?   @db.VarChar(16)
+  CHECKED_BY         String    @db.Char(1)
+  CHECKED_EMP_ID     String?   @db.VarChar(16)
+  CHECKED_SUPP_ID    String?   @db.VarChar(16)
+  CHECKED_CUST_ID    String?   @db.VarChar(16)
+  COLL_USER_DEF_1    String?   @db.VarChar(16)
+  PROCESS_ID         String?   @db.VarChar(16)
+  AREA_NUMBER        Decimal?  @db.Decimal(5, 0)
+  ACTIVITY_NO        Decimal?  @db.Decimal(5, 0)
+  ELEMENT_NO         Decimal?  @db.Decimal(5, 0)
+  TRPC_OPERATION_NO  String?   @db.VarChar(8)
+  DISP_DATE          DateTime? @db.DateTime(0)
+  DISPOSITION_TYPE   String?   @db.VarChar(16)
+  DISP_ASSIGNED_TO   String?   @db.VarChar(16)
+  DISP_DUE_DATE      DateTime? @db.DateTime(0)
+  DISP_BY            String    @db.Char(1)
+  DISP_EMPLOYEE_ID   String?   @db.VarChar(16)
+  DISP_CUSTOMER_ID   String?   @db.VarChar(16)
+  DISP_CUST_CONT     Decimal?  @db.Decimal(5, 0)
+  DISP_SUPPLIER_ID   String?   @db.VarChar(16)
+  DISP_SUPP_CONT     Decimal?  @db.Decimal(5, 0)
+  DISP_CLOSED        String    @db.Char(1)
+  DISP_CLOSED_DATE   DateTime? @db.DateTime(0)
+  VERIFY_DATE        DateTime? @db.DateTime(0)
+  VERIFIED_ASSG_TO   String?   @db.VarChar(16)
+  VERIFY_DUE_DATE    DateTime? @db.DateTime(0)
+  VERIFY_BY          String?   @db.VarChar(16)
+  VERIFY_CLOSED      String    @db.Char(1)
+  VERIFY_CLOSED_DATE DateTime? @db.DateTime(0)
+  SERIAL_NUMBER      String?   @db.VarChar(24)
+  MEETING_ID         String?   @db.VarChar(16)
+  CLOSED             String    @db.Char(1)
+  CLOSED_DATE        DateTime? @db.DateTime(0)
+  ERP_ID1            String?   @db.VarChar(32)
+  ERP_ID2            String?   @db.VarChar(32)
+  ERP_ID3            String?   @db.VarChar(32)
+  ERP_ID4            String?   @db.VarChar(32)
+  ERP_ID5            String?   @db.VarChar(32)
+  ERP_ID6            String?   @db.VarChar(32)
+  ERP_ID7            String?   @db.VarChar(32)
+  ERP_ID8            String?   @db.VarChar(32)
+  ERP_ID9            String?   @db.VarChar(32)
+  CREATE_BY          String    @db.VarChar(16)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  ENTITY_ID          String?   @db.VarChar(8)
+}
+
+model PEOPLE {
+  PEOPLE_ID          String    @id @db.VarChar(16)
+  LAST_NAME          String    @db.VarChar(30)
+  FIRST_NAME         String    @db.VarChar(30)
+  MIDDLE_INITIAL     String?   @db.Char(1)
+  FUNCTION_CODE      String?   @db.VarChar(16)
+  JOB_CODE           String?   @db.VarChar(16)
+  START_DATE         DateTime? @db.DateTime(0)
+  END_DATE           DateTime? @db.DateTime(0)
+  PAY_TYPE           String?   @db.Char(1)
+  STATUS             String?   @db.Char(1)
+  SALARY             Decimal?  @db.Decimal(10, 2)
+  HOURLY_COST        Decimal?  @db.Decimal(10, 3)
+  SHIFT              String?   @db.VarChar(15)
+  DEPARTMENT         String?   @db.VarChar(15)
+  SUPERVISOR_ID      String?   @db.VarChar(16)
+  LOCATION           String?   @db.VarChar(50)
+  EMP_LEVEL          String?   @db.VarChar(3)
+  WORK_PHONE         String?   @db.VarChar(25)
+  OTHER_NUMBER       String?   @db.VarChar(25)
+  ADDRESS_LINE_1     String?   @db.VarChar(50)
+  WORK_EMAIL_ADDRESS String?   @db.VarChar(100)
+  ADDRESS_LINE_2     String?   @db.VarChar(50)
+  CITY               String?   @db.VarChar(30)
+  ZIP                String?   @db.VarChar(12)
+  STATE              String?   @db.VarChar(16)
+  HOME_PHONE         String?   @db.VarChar(25)
+  SOCIAL_SECURITY    String?   @db.VarChar(12)
+  BIRTH_DATE         DateTime? @db.DateTime(0)
+  HOME_EMAIL_ADDRESS String?   @db.VarChar(100)
+  SENORITY_DATE      DateTime? @db.DateTime(0)
+  SPECIAL_DATE       DateTime? @db.DateTime(0)
+  CREATE_BY          String    @db.VarChar(16)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  ENTITY_ID          String?   @db.VarChar(8)
+}
+
+model PEOPLE_INPUT {
+  INPUT_ID         String    @id @db.VarChar(16)
+  INPUT_DATE       DateTime? @db.DateTime(0)
+  PEOPLE_ID        String?   @db.VarChar(16)
+  INPUT_TYPE       String?   @db.VarChar(16)
+  SUBJECT          String?   @db.VarChar(16)
+  REFERENCE        String?   @db.VarChar(40)
+  ASSIGNED_TO      String?   @db.VarChar(16)
+  DUE_DATE         DateTime? @db.DateTime(0)
+  CLOSED           String?   @db.Char(1)
+  CLOSED_DATE      DateTime? @db.DateTime(0)
+  COST_SAVINGS     Decimal?  @db.Decimal(9, 2)
+  PROJECT_ID       String?   @db.VarChar(16)
+  MEETING_ID       String?   @db.VarChar(16)
+  ACKNOWLEDGE_BY   String?   @db.VarChar(16)
+  ACKNOWLEDGE_DATE DateTime? @db.DateTime(0)
+  RESPONSE_BY      String?   @db.VarChar(16)
+  RESPONSE_DATE    DateTime? @db.DateTime(0)
+  FOLLOWUP_BY      String?   @db.VarChar(16)
+  FOLLOWUP_DATE    DateTime? @db.DateTime(0)
+  USER_DEFINED_2   String?   @db.VarChar(16)
+  USER_DEFINED_1   String?   @db.VarChar(16)
+  CREATE_BY        String?   @db.VarChar(16)
+  CREATE_DATE      DateTime? @db.DateTime(0)
+  MODIFIED_BY      String?   @db.VarChar(16)
+  MODIFIED_DATE    DateTime? @db.DateTime(0)
+  ENTITY_ID        String?   @db.VarChar(8)
+}
+
+model PPL_INPT_ACKL {
+  INPUT_ID         String  @id @unique(map: "PK_EMP_INPUT_ACK") @db.VarChar(16)
+  ACKNOWLEDGE_TEXT String? @db.MediumText
+}
+
+model PPL_INPT_FLUP {
+  INPUT_ID      String  @id @unique(map: "PK_EMP_INP_FOLLOW") @db.VarChar(16)
+  FOLLOWUP_TEXT String? @db.MediumText
+}
+
+model PPL_INPT_RCUR {
+  RECUR_ID    String  @id @db.VarChar(16)
+  INPUT_ID    String? @db.VarChar(16)
+  ASSIGNED_TO String? @db.VarChar(45)
+  FREQUENCY   String? @db.VarChar(8)
+  SUBJECT     String? @db.VarChar(16)
+  STATUS      String? @db.VarChar(1)
+}
+
+model PPL_INPT_RSPN {
+  INPUT_ID      String  @id @unique(map: "PK_EMP_INP_RESP") @db.VarChar(16)
+  RESPONSE_TEXT String? @db.MediumText
+}
+
+model PPL_INPT_TEXT {
+  INPUT_ID   String  @id @unique(map: "PK_EMP_INPUT_TEXT") @db.VarChar(16)
+  INPUT_TEXT String? @db.MediumText
+}
+
+model PRCS_MODL_DESC {
+  PROCESS_ID  String  @db.VarChar(16)
+  AREA_NUMBER Decimal @db.Decimal(5, 0)
+  ACTIVITY_NO Decimal @db.Decimal(5, 0)
+  ELEMENT_NO  Decimal @db.Decimal(5, 0)
+  DESCRIPTION String? @db.MediumText
+
+  @@id([PROCESS_ID, AREA_NUMBER, ACTIVITY_NO, ELEMENT_NO])
+}
+
+model PROCESS {
+  PROCESS_ID       String    @db.VarChar(16)
+  LOCATION         String?   @db.VarChar(50)
+  PROCESS_NAME     String    @db.VarChar(50)
+  CONTROL_EMP_ID   String?   @db.VarChar(16)
+  CONTROL_JOB_CODE String?   @db.VarChar(16)
+  CONTROL_FUN_CODE String?   @db.VarChar(16)
+  CREATE_BY        String    @db.VarChar(16)
+  CREATE_DATE      DateTime  @db.DateTime(0)
+  MODIFIED_BY      String?   @db.VarChar(16)
+  MODIFIED_DATE    DateTime? @db.DateTime(0)
+  ENTITY_ID        String?   @db.VarChar(8)
+
+  @@id([PROCESS_ID, PROCESS_NAME, CREATE_DATE])
+}
+
+model PROCESS_AUDIT {
+  AUDIT_ID        String    @id @db.VarChar(16)
+  PROCESS_ID      String    @db.VarChar(16)
+  AREA_NUMBER     Decimal   @db.Decimal(5, 0)
+  ACTIVITY_NO     Decimal   @db.Decimal(5, 0)
+  ELEMENT_NO      Decimal   @db.Decimal(5, 0)
+  DUE_DATE        DateTime? @db.DateTime(0)
+  RESULT          String    @db.Char(2)
+  REVISION_LEVEL  String?   @db.VarChar(4)
+  ISSUE_DATE      DateTime? @db.DateTime(0)
+  NEXT_AUDIT_DATE DateTime? @db.DateTime(0)
+  AUDITED_BY      String    @db.Char(1)
+  SUPPLIER_ID     String?   @db.VarChar(16)
+  SUPP_CONT_NO    Decimal?  @db.Decimal(5, 0)
+  CUSTOMER_ID     String?   @db.VarChar(16)
+  CUST_CONT_NO    Decimal?  @db.Decimal(5, 0)
+  EMPLOYEE_ID     String?   @db.VarChar(16)
+  COMPLETION_DATE DateTime? @db.DateTime(0)
+  CREATE_BY       String    @db.VarChar(16)
+  CREATE_DATE     DateTime  @db.DateTime(0)
+  MODIFIED_BY     String?   @db.VarChar(16)
+  MODIFIED_DATE   DateTime? @db.DateTime(0)
+  ENTITY_ID       String?   @db.VarChar(8)
+}
+
+model PROCESS_MODEL {
+  PROCESS_ID    String    @db.VarChar(16)
+  AREA_NUMBER   Decimal   @db.Decimal(5, 0)
+  ACTIVITY_NO   Decimal   @db.Decimal(5, 0)
+  ELEMENT_NO    Decimal   @db.Decimal(5, 0)
+  PROCESS_LEVEL String    @db.Char(1)
+  NAME          String?   @db.VarChar(254)
+  EMPLOYEE_ID   String?   @db.VarChar(16)
+  JOB_CODE      String?   @db.VarChar(16)
+  FUNCTION_CODE String?   @db.VarChar(16)
+  CREATE_BY     String    @db.VarChar(16)
+  CREATE_DATE   DateTime  @db.DateTime(0)
+  MODIFIED_BY   String?   @db.VarChar(16)
+  MODIFIED_DATE DateTime? @db.DateTime(0)
+
+  @@id([PROCESS_ID, AREA_NUMBER, ACTIVITY_NO, ELEMENT_NO])
+  @@unique([PROCESS_ID, AREA_NUMBER, ACTIVITY_NO, ELEMENT_NO], map: "PK_PS_MODEL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model PRODUCT {
+  PRODUCT_ID        String    @id @db.VarChar(30)
+  PRODUCT_DOC_TYPE  String?   @db.VarChar(16)
+  NAME              String?   @db.VarChar(40)
+  REVISION_LEVEL    String?   @db.VarChar(8)
+  ISSUE_DATE        DateTime? @db.Date
+  DRAWING_NUMBER    String?   @db.VarChar(16)
+  STATUS            String?   @default("C") @db.Char(1)
+  PRODUCT_TYPE      String?   @db.VarChar(16)
+  COMMODITY_TYPE    String?   @db.VarChar(16)
+  REFERENCE         String?   @db.VarChar(24)
+  MAJOR_LOCATION    String?   @db.VarChar(16)
+  MINOR_LOCATION    String?   @db.VarChar(16)
+  LAST_AUDIT_DATE   DateTime? @db.Date
+  NEXT_AUDIT_DATE   DateTime? @db.Date
+  AUDIT_RESPONSIBLE String?   @default("I") @db.Char(1)
+  JOB_CODE          String?   @db.VarChar(16)
+  FUNCTION_CODE     String?   @db.VarChar(16)
+  EMPLOYEE_ID       String?   @db.VarChar(16)
+  SUPPLIER_ID       String?   @db.VarChar(16)
+  SUPP_CONT_NO      Int?
+  CUSTOMER_ID       String?   @db.VarChar(16)
+  CUST_CONT_NO      Int?
+  SPECIAL_INTERVAL  Int?
+  STANDARD_INTERVAL Int?
+  TIME_ESTIMATE     Float?
+  RETENSION         Int?
+  CREATE_DATE       DateTime  @db.Date
+  CREATE_BY         String    @db.VarChar(16)
+  MODIFIED_DATE     DateTime? @db.Date
+  MODIFIED_BY       String?   @db.VarChar(16)
+  STAGE             String?   @default("PT") @db.Char(2)
+  USER_DEFINED_1    String?   @db.VarChar(16)
+  USER_DEFINED_2    String?   @db.VarChar(16)
+  ENTITY_ID         String?   @db.VarChar(8)
+
+  @@ignore
+}
+
+model PRODUCT_BOM {
+  PRODUCT_ID     String @db.VarChar(30)
+  BOM_PRODUCT_ID String @db.VarChar(30)
+
+  @@id([PRODUCT_ID, BOM_PRODUCT_ID])
+}
+
+model PRODUCT_BOS {
+  PRODUCT_ID           String @db.VarChar(30)
+  BOS_SPECIFICATION_ID String @db.VarChar(30)
+
+  @@id([PRODUCT_ID, BOS_SPECIFICATION_ID])
+}
+
+model PROJECT {
+  PROJECT_ID    String    @id @unique(map: "PK_PROJECT") @db.VarChar(16)
+  NAME          String?   @db.VarChar(40)
+  LEADER        String?   @db.VarChar(16)
+  DUE_DATE      DateTime? @db.DateTime(0)
+  CLOSED        String?   @db.Char(1)
+  CLOSED_DATE   DateTime? @db.DateTime(0)
+  STATUS        String?   @db.VarChar(16)
+  COST_SAVINGS  Decimal?  @db.Decimal(9, 2)
+  PRIORITY      String?   @db.VarChar(16)
+  PROJECT_TYPE  String?   @db.VarChar(16)
+  CREATE_BY     String    @db.VarChar(16)
+  CREATE_DATE   DateTime  @db.DateTime(0)
+  MODIFIED_BY   String?   @db.VarChar(16)
+  MODIFIED_DATE DateTime? @db.DateTime(0)
+  ENTITY_ID     String?   @db.VarChar(8)
+}
+
+model PROJ_DESC {
+  PROJECT_ID  String  @id @unique(map: "PK_PROJECT_DESC") @db.VarChar(16)
+  DESCRIPTION String? @db.MediumText
+}
+
+model ROLES {
+  PEOPLE_ID     String @db.VarChar(16)
+  JOB_CODE      String @db.VarChar(16)
+  FUNCTION_CODE String @db.VarChar(40)
+
+  @@id([PEOPLE_ID, JOB_CODE, FUNCTION_CODE])
+}
+
+model SKILLS {
+  SKILL_ID       String    @id @db.VarChar(16)
+  NAME           String?   @db.VarChar(60)
+  STATUS         String    @db.Char(1)
+  REVISION_LEVEL String?   @db.VarChar(5)
+  ISSUE_DATE     DateTime? @db.DateTime(0)
+  ENTITY_ID      String?   @db.VarChar(8)
+  CREATE_BY      String    @db.VarChar(16)
+  CREATED_DATE   DateTime  @db.DateTime(0)
+  MODIFIED_BY    String?   @db.VarChar(16)
+  MODIFIED_DATE  DateTime? @db.DateTime(0)
+}
+
+model SUPPLIER {
+  SUPPLIER_ID        String    @id @db.VarChar(16)
+  NAME               String?   @db.VarChar(50)
+  SUPPLIER_TYPE      String?   @db.VarChar(16)
+  ADDRESS_LINE_1     String?   @db.VarChar(50)
+  ADDRESS_LINE_2     String?   @db.VarChar(50)
+  ADDRESS_LINE_3     String?   @db.VarChar(50)
+  ADDRESS_LINE_4     String?   @db.VarChar(30)
+  CITY               String?   @db.VarChar(30)
+  ZIP                String?   @db.VarChar(12)
+  STATE              String?   @db.VarChar(16)
+  PHONE              String?   @db.VarChar(25)
+  COUNTRY            String?   @db.VarChar(50)
+  FAX                String?   @db.VarChar(25)
+  PRIMARY_CONTACT_NO Decimal?  @db.Decimal(5, 0)
+  STATUS             String    @db.Char(1)
+  ASSIGNED_TO        String?   @db.VarChar(16)
+  EMAIL_ADDRESS      String?   @db.VarChar(100)
+  SOURCE             String?   @db.VarChar(16)
+  TERRITORY          String?   @db.VarChar(16)
+  USER_DEFINED_8     String?   @db.VarChar(16)
+  USER_DEFINED_9     String?   @db.VarChar(16)
+  CREATE_BY          String    @db.VarChar(16)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  USER_DEFINED_10    String?   @db.VarChar(16)
+  USER_DEFINED_11    String?   @db.VarChar(16)
+  ENTITY_ID          String?   @db.VarChar(8)
+}
+
+model SUPPLIER_COMMENTS {
+  SUPPLIER_ID String  @id @db.VarChar(16)
+  COMMENTS    String? @db.MediumText
+}
+
+model SUPPLIER_CONTACT {
+  SUPPLIER_ID        String    @db.VarChar(16)
+  SUPP_CONT_NO       Decimal   @db.Decimal(5, 0)
+  LAST_NAME          String?   @db.VarChar(30)
+  FIRST_NAME         String?   @db.VarChar(30)
+  MIDDLE_INITIAL     String?   @db.Char(2)
+  FUNCTION_CODE      String?   @db.VarChar(16)
+  JOB_CODE           String?   @db.VarChar(16)
+  CONTACT_PHONE      String?   @db.VarChar(25)
+  CONTACT_FAX        String?   @db.VarChar(25)
+  OTHER_NUMBER       String?   @db.VarChar(25)
+  OTHER_ADDRESS      String?   @db.VarChar(25)
+  WORK_EMAIL_ADDRESS String?   @db.VarChar(100)
+  REFERENCE          String?   @db.VarChar(40)
+  STATUS             String    @db.Char(1)
+  ADDRESS_LINE_1     String?   @db.VarChar(30)
+  ADDRESS_LINE_2     String?   @db.VarChar(30)
+  CITY               String?   @db.VarChar(30)
+  STATE              String?   @db.VarChar(16)
+  ZIP                String?   @db.VarChar(12)
+  COUNTRY            String?   @db.VarChar(16)
+  HOME_PHONE         String?   @db.VarChar(25)
+  HOME_FAX           String?   @db.VarChar(25)
+  HOME_EMAIL_ADDRESS String?   @db.VarChar(100)
+  CREATE_BY          String    @db.VarChar(16)
+  CREATE_DATE        DateTime  @db.DateTime(0)
+  MODIFIED_BY        String?   @db.VarChar(16)
+  MODIFIED_DATE      DateTime? @db.DateTime(0)
+  BIRTH_DATE         DateTime? @db.DateTime(0)
+
+  @@id([SUPPLIER_ID, SUPP_CONT_NO])
+  @@unique([SUPPLIER_ID, SUPP_CONT_NO], map: "PK_SM_CONTACT")
+}
+
+model SUPPLIER_QMS {
+  SUPPLIER_ID String   @db.VarChar(16)
+  QMS         String   @db.VarChar(45)
+  CERTIFICATE String   @db.VarChar(45)
+  EXPIRY_DATE DateTime @db.DateTime(0)
+
+  @@id([SUPPLIER_ID, QMS, EXPIRY_DATE, CERTIFICATE])
+}
+
+model SUPPLIER_SCOPE {
+  SUPPLIER_ID String @db.VarChar(16)
+  SCOPE       String @db.VarChar(45)
+
+  @@id([SUPPLIER_ID, SCOPE])
+}
+
+model SYSTEM_IDS {
+  TABLE_NAME  String  @id @db.VarChar(40)
+  CURRENT_ID  String  @db.VarChar(40)
+  DESCRIPTION String? @db.VarChar(100)
+}
+
+model SYS_AUDT_CHKL {
+  SYS_AUDT_CHKL    String @db.VarChar(16)
+  AUDIT_MANAGER_ID String @db.VarChar(16)
+  AUDIT_ID         String @db.VarChar(16)
+
+  @@id([SYS_AUDT_CHKL, AUDIT_MANAGER_ID, AUDIT_ID])
 }
