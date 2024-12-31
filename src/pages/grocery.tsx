@@ -61,7 +61,7 @@ const Home: NextPage = () => {
       <Head>
         <title>Input2</title>
         <meta name="description" content="Visit www.christensenindustries.com" />
-        <link rel="icon" href="/ci-logo.ico" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
